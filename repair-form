@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>修理受付申込書 兼 保証書</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --blue:#2563eb;
+      --green:#16a34a;
+      --red:#ef4444;
+      --orange:#f59e0b;
+      --gray:#6b7280;
+      --line:#a3a3a3;
+      --bg:#f3f4f6;
+      --paper:#ffffff;
+      --input:#fffef0;
+      --text:#222;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:rgba(0,0,0,0.08);
+    }
+
+    html{
+      -webkit-text-size-adjust:100%;
+      background:var(--bg);
+    }
+
+    body{
+      margin:0;
+      padding:16px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo",Arial,sans-serif;
+      user-select:auto;
+      -webkit-user-select:auto;
+    }
+
+    .page{
+      max-width:1100px;
+      margin:0 auto;
+      background:var(--paper);
+      border-radius:12px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.08);
+      overflow:hidden;
+    }
+
+    .topbar{
+      padding:18px 20px 8px;
+      border-bottom:2px solid #dbeafe;
+      background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);
+    }
+
+    h1{
+      margin:0 0 10px;
+      text-align:center;
+      font-size:26px;
+      color:#0f172a;
+      letter-spacing:.02em;
+    }
+
+    .subnote{
+      text-align:center;
+      font-size:12px;
+      color:#666;
+    }
+
+    .content{
+      padding:18px;
+    }
+
+    .row-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .type-select,
+    .hint-box{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .hint-box{
+      font-size:12px;
+      color:#666;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:42px;
+      padding:8px 12px;
+      border:1px solid #cbd5e1;
+      border-radius:999px;
+      background:#fff;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-bottom:14px;
+    }
+
+    th, td{
+      border:1px solid var(--line);
+      padding:8px;
+      font-size:13px;
+      vertical-align:middle;
+    }
+
+    th{
+      width:125px;
+      background:#f9fafb;
+      text-align:center;
+      white-space:nowrap;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="tel"]{
+      width:100%;
+      min-height:46px;
+      padding:10px 12px;
+      border:1px solid #cfcfcf;
+      border-radius:8px;
+      background:var(--input);
+      font-size:16px;
+      color:#111;
+      appearance:none;
+      -webkit-appearance:none;
+    }
+
+    input::placeholder{
+      color:#888;
+    }
+
+    input, button, label, textarea, select{
+      touch-action:manipulation;
+      pointer-events:auto;
+    }
+
+    input[type="checkbox"]{
+      width:22px;
+      height:22px;
+      margin:0;
+      accent-color:var(--blue);
+      flex:0 0 auto;
+    }
+
+    .check-wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 10px;
+    }
+
+    .tap-label{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:40px;
+      padding:6px 10px;
+      border-radius:8px;
+      background:#fff;
+      font-size:13px;
+      line-height:1.35;
+      border:1px solid #e5e7eb;
+      cursor:pointer;
+    }
+
+    .tap-label.small{
+      min-height:36px;
+      padding:4px 8px;
+      font-size:12px;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1.1fr 1fr;
+      gap:16px;
+      align-items:start;
+      margin-bottom:14px;
+    }
+
+    .card{
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .card-header{
+      padding:10px 12px;
+      font-size:14px;
+      font-weight:800;
+      border-bottom:1px solid #e5e7eb;
+    }
+
+    .card-body{
+      padding:12px;
+    }
+
+    .before-head{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+
+    .after-head{
+      background:#dcfce7;
+      color:#166534;
+    }
+
+    .damage-head{
+      background:#fff7ed;
+      color:#9a3412;
+    }
+
+    .warranty-head{
+      background:#ecfdf5;
+      color:#065f46;
+    }
+
+    .panel-note{
+      margin-top:6px;
+      font-size:12px;
+      color:#666;
+    }
+
+    .damage-stack{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .damage-panel{
+      border:1px solid #cbd5e1;
+      border-radius:12px;
+      background:#fafafa;
+      padding:10px;
+    }
+
+    .damage-title{
+      font-size:14px;
+      font-weight:800;
+      margin-bottom:8px;
+      color:#334155;
+    }
+
+    .canvas-wrap{
+      position:relative;
+      width:100%;
+      background:#fff;
+      border:2px dashed #cbd5e1;
+      border-radius:12px;
+      overflow:hidden;
+    }
+
+    .damage-canvas-wrap{
+      height:280px;
+    }
+
+    .sig-canvas-wrap{
+      height:160px;
+      border-style:solid;
+      border-width:2px;
+    }
+
+    .canvas-bg{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:1;
+      color:#94a3b8;
+      font-weight:700;
+      font-size:18px;
+      text-align:center;
+      padding:12px;
+    }
+
+    .phone-outline{
+      width:140px;
+      height:235px;
+      border:3px solid #cbd5e1;
+      border-radius:22px;
+      background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+      position:relative;
+    }
+
+    .phone-outline::before{
+      content:"";
+      position:absolute;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%);
+      width:42px;
+      height:6px;
+      border-radius:999px;
+      background:#cbd5e1;
+    }
+
+    .phone-outline.back{
+      border-style:dashed;
+    }
+
+    .draw-canvas{
+      position:absolute;
+      inset:0;
+      z-index:2;
+      width:100%;
+      height:100%;
+      touch-action:none;
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+      background:transparent;
+    }
+
+    .canvas-actions{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .sig-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-bottom:14px;
+    }
+
+    .sig-card{
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#f8fafc;
+      padding:12px;
+    }
+
+    .sig-title{
+      font-size:14px;
+      font-weight:800;
+      margin-bottom:8px;
+      color:#1e3a8a;
+    }
+
+    .terms-box{
+      border:1px solid #cbd5e1;
+      padding:12px;
+      height:250px;
+      overflow:auto;
+      font-size:12px;
+      line-height:1.75;
+      background:#fdfdfd;
+      margin-bottom:14px;
+      border-radius:10px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .terms-title{
+      display:inline-block;
+      margin-bottom:8px;
+      padding:4px 8px;
+      background:#eef2ff;
+      border-radius:6px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .section-note{
+      margin:-2px 0 12px;
+      font-size:12px;
+      color:#6b7280;
+    }
+
+    .toolbar{
+      position:sticky;
+      bottom:0;
+      z-index:10;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      padding:14px;
+      border-top:1px solid #dbeafe;
+      background:rgba(255,255,255,0.95);
+      backdrop-filter:blur(8px);
+    }
+
+    .btn{
+      min-height:52px;
+      padding:12px 18px;
+      border:none;
+      border-radius:12px;
+      font-size:16px;
+      font-weight:800;
+      color:#fff;
+      cursor:pointer;
+      box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .btn-blue{ background:var(--blue); }
+    .btn-green{ background:var(--green); }
+    .btn-orange{ background:var(--orange); }
+    .btn-gray{ background:var(--gray); }
+    .btn-red{ background:var(--red); }
+
+    .btn.small{
+      min-height:40px;
+      padding:8px 12px;
+      font-size:13px;
+      border-radius:10px;
+    }
+
+    .helper{
+      margin-top:6px;
+      text-align:center;
+      font-size:12px;
+      color:#64748b;
+      padding:0 16px 16px;
+    }
+
+    .hidden-export{
+      display:none !important;
+    }
+
+    #warrantySection{
+      display:none;
+      margin-top:18px;
+      border-top:6px solid #d1fae5;
+      background:#ffffff;
+    }
+
+    .warranty-box{
+      max-width:780px;
+      margin:0 auto;
+      background:#fff;
+      border:2px solid #16a34a;
+      border-radius:14px;
+      padding:20px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .warranty-title{
+      font-size:28px;
+      color:#16a34a;
+      text-align:center;
+      margin:0 0 14px;
+      border-bottom:2px solid #16a34a;
+      padding-bottom:8px;
+      font-weight:800;
+    }
+
+    .warranty-lead{
+      font-size:14px;
+      line-height:1.8;
+      margin:0 0 14px;
+    }
+
+    .warranty-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-bottom:14px;
+    }
+
+    .warranty-table th,
+    .warranty-table td{
+      border:1px solid #cbd5e1;
+      padding:10px;
+      font-size:14px;
+    }
+
+    .warranty-table th{
+      width:150px;
+      background:#f8fafc;
+      text-align:left;
+    }
+
+    .warranty-rules{
+      border:1px solid #d1d5db;
+      background:#fafafa;
+      border-radius:10px;
+      padding:12px;
+      font-size:12px;
+      line-height:1.75;
+      margin-bottom:16px;
+    }
+
+    .warranty-signs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-bottom:14px;
+      align-items:start;
+    }
+
+    .warranty-sign-box{
+      text-align:center;
+      border:1px solid #dbeafe;
+      background:#f8fbff;
+      border-radius:10px;
+      padding:10px;
+    }
+
+    .warranty-sign-label{
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:8px;
+      color:#334155;
+    }
+
+    .warranty-sign-img{
+      max-width:100%;
+      width:100%;
+      height:120px;
+      object-fit:contain;
+      border:1px solid #cbd5e1;
+      background:#fff;
+      border-radius:8px;
+    }
+
+    .warranty-note{
+      text-align:center;
+      font-size:12px;
+      color:#6b7280;
+    }
+
+    @media (max-width: 980px){
+      .grid-2,
+      .sig-grid,
+      .warranty-signs{
+        grid-template-columns:1fr;
+      }
+
+      .damage-canvas-wrap{
+        height:250px;
+      }
+
+      .sig-canvas-wrap{
+        height:145px;
+      }
+    }
+
+    @media (max-width: 700px){
+      body{
+        padding:10px;
+      }
+
+      .content{
+        padding:12px;
+      }
+
+      h1{
+        font-size:22px;
+      }
+
+      th, td{
+        font-size:12px;
+        padding:6px;
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .warranty-box{
+        padding:14px;
+      }
+
+      .warranty-title{
+        font-size:22px;
+      }
+    }
+
+    @media print{
+      body{
+        background:#fff;
+        padding:0;
+      }
+
+      .page{
+        max-width:none;
+        box-shadow:none;
+        border-radius:0;
+      }
+
+      .toolbar,
+      .canvas-actions,
+      .helper,
+      .hint-box,
+      .exclude-export{
+        display:none !important;
+      }
+
+      .terms-box{
+        height:auto;
+        overflow:visible;
+      }
+
+      body.print-main #warrantySection{
+        display:none !important;
+      }
+
+      body.print-warranty #mainPageBlock{
+        display:none !important;
+      }
+
+      body.print-warranty #warrantySection{
+        display:block !important;
+        border-top:none;
+        margin-top:0;
+      }
+
+      body.print-warranty .warranty-box{
+        box-shadow:none;
+        border-radius:0;
+        max-width:none;
+        border-width:1px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div id="mainPageBlock">
+    <div id="mainCaptureArea">
+      <div class="topbar">
+        <h1>修理受付申込書 兼 保証書</h1>
+             </div>
+
+      <div class="content">
+        <div class="row-head">
+          <div class="type-select">
+            <label class="pill"><input type="checkbox" id="typeIphone"> iPhone</label>
+            <label class="pill"><input type="checkbox" id="typeAndroid"> Android</label>
+          </div>
+          <div class="hint-box">
+            <span>共有ボタンからメール / LINE / AirDrop / ファイル保存へ送れます</span>
+          </div>
+        </div>
+
+        <table>
+          <tr>
+            <th>申込日</th>
+            <td><input type="date" id="reqDate"></td>
+            <th>ご来店のきっかけ</th>
+            <td>
+              <div class="check-wrap">
+                <label class="tap-label small"><input type="checkbox">HP</label>
+                <label class="tap-label small"><input type="checkbox">SNS</label>
+                <label class="tap-label small"><input type="checkbox">チラシ</label>
+                <label class="tap-label small"><input type="checkbox">通りがかり</label>
+                <label class="tap-label small"><input type="checkbox">その他</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th>フリガナ</th>
+            <td><input type="text" id="custFuri" placeholder="シュウリ タロウ"></td>
+            <th>連絡先</th>
+            <td><input type="tel" id="custPhone" placeholder="090-XXXX-XXXX"></td>
+          </tr>
+          <tr>
+            <th>お名前</th>
+            <td><input type="text" id="custName" placeholder="修理 太郎"></td>
+            <th>保証加入状況</th>
+            <td>
+              <div class="check-wrap">
+                <label class="tap-label small"><input type="checkbox">キャリア保証 加入</label>
+                <label class="tap-label small"><input type="checkbox">キャリア保証 未加入</label>
+                <label class="tap-label small"><input type="checkbox">AppleCare 加入</label>
+                <label class="tap-label small"><input type="checkbox">AppleCare 未加入</label>
+                <label class="tap-label small"><input type="checkbox">損保会社 加入</label>
+                <label class="tap-label small"><input type="checkbox">損保会社 未加入</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th>ご住所</th>
+            <td colspan="3"><input type="text" id="custAddr" placeholder="東京都千代田区..."></td>
+          </tr>
+          <tr>
+            <th>機種名</th>
+            <td><input type="text" id="devModel" placeholder="iPhone 13 Pro"></td>
+            <th>色</th>
+            <td><input type="text" id="devColor" placeholder="シエラブルー"></td>
+          </tr>
+          <tr>
+            <th>修理端末IMEI</th>
+            <td><input type="text" id="devImei" placeholder="35XXXXXXXXXXXXX"></td>
+            <th>パスコード</th>
+            <td><input type="text" id="devPass" placeholder="123456 または スワイプ"></td>
+          </tr>
+          <tr>
+            <th>返却プログラム</th>
+            <td colspan="3">
+              <div class="check-wrap">
+                <label class="tap-label small"><input type="checkbox">有り（分割清算中などを含む）</label>
+                <label class="tap-label small"><input type="checkbox">無し</label>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header before-head">修理前チェック【✔ 問題ない｜確認不可は空白】</div>
+            <div class="card-body">
+              <table style="margin-bottom:0;">
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">通話確認</label></td>
+                  <td><label class="tap-label"><input type="checkbox">ホームボタン</label></td>
+                  <td><label class="tap-label"><input type="checkbox">タッチ</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">スリープボタン</label></td>
+                  <td><label class="tap-label"><input type="checkbox">Wi‑Fi</label></td>
+                  <td><label class="tap-label"><input type="checkbox">ドックネジ</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">マナーモード</label></td>
+                  <td><label class="tap-label"><input type="checkbox">カメラ</label></td>
+                  <td><label class="tap-label"><input type="checkbox">ボリュームキー</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">近接センサー</label></td>
+                  <td><label class="tap-label"><input type="checkbox">充電</label></td>
+                  <td><label class="tap-label"><input type="checkbox">指紋認証 / 顔認証</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">3Dタッチ</label></td>
+                  <td><label class="tap-label"><input type="checkbox">水没</label></td>
+                  <td><label class="tap-label"><input type="checkbox">確認不可</label></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header after-head">修理後チェック【✔ 問題ない｜確認不可は空白】</div>
+            <div class="card-body">
+              <table style="margin-bottom:0;">
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">通話確認</label></td>
+                  <td><label class="tap-label"><input type="checkbox">ホームボタン</label></td>
+                  <td><label class="tap-label"><input type="checkbox">タッチ</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">スリープボタン</label></td>
+                  <td><label class="tap-label"><input type="checkbox">Wi‑Fi</label></td>
+                  <td><label class="tap-label"><input type="checkbox">ドックネジ</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">マナーモード</label></td>
+                  <td><label class="tap-label"><input type="checkbox">カメラ</label></td>
+                  <td><label class="tap-label"><input type="checkbox">ボリュームキー</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">近接センサー</label></td>
+                  <td><label class="tap-label"><input type="checkbox">充電</label></td>
+                  <td><label class="tap-label"><input type="checkbox">指紋認証 / 顔認証</label></td>
+                </tr>
+                <tr>
+                  <td><label class="tap-label"><input type="checkbox">3Dタッチ</label></td>
+                  <td><label class="tap-label"><input type="checkbox">水没</label></td>
+                  <td><label class="tap-label"><input type="checkbox">確認不可</label></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-header damage-head">外装キズ・画面割れメモ欄（大型）</div>
+          <div class="card-body">
+            <div class="damage-stack">
+              <div class="damage-panel">
+                <div class="damage-title">【画面側】</div>
+                <div class="canvas-wrap damage-canvas-wrap">
+                  <div class="canvas-bg">
+                    <div>
+                      <div style="margin-bottom:10px;">画面側</div>
+                      <div class="phone-outline"></div>
+                    </div>
+                  </div>
+                  <canvas id="damageFrontCanvas" class="draw-canvas"></canvas>
+                </div>
+                <div class="canvas-actions">
+                  <button type="button" class="btn btn-gray small" onclick="clearCanvas('damageFrontCanvas')">画面側をクリア</button>
+                </div>
+              </div>
+
+              <div class="damage-panel">
+                <div class="damage-title">【背面側】</div>
+                <div class="canvas-wrap damage-canvas-wrap">
+                  <div class="canvas-bg">
+                    <div>
+                      <div style="margin-bottom:10px;">背面側</div>
+                      <div class="phone-outline back"></div>
+                    </div>
+                  </div>
+                  <canvas id="damageBackCanvas" class="draw-canvas"></canvas>
+                </div>
+                <div class="canvas-actions">
+                  <button type="button" class="btn btn-gray small" onclick="clearCanvas('damageBackCanvas')">背面側をクリア</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel-note">赤線で自由に記入できます。</div>
+          </div>
+        </div>
+
+        <table>
+          <tr>
+            <th>【修理内容】</th>
+            <td><input type="text" id="repContent" placeholder="液晶パネル交換、バッテリー交換など"></td>
+            <th>修理金額</th>
+            <td style="width:200px;"><input type="text" id="repPrice" placeholder="￥19,000" style="font-weight:800; color:#b91c1c;"></td>
+          </tr>
+        </table>
+
+        <div class="terms-box">
+          <div class="terms-title">免責事項（必ずお読みください）</div><br>
+          1. 当店はメーカーの正規修理店ではありません。<br>
+          2. 端末のロックが掛かっている場合、事前に解除をお願いいたします。取り付けたパーツの動作検証を行う際に必要となります。解除不可の場合、動作検証をおこなえないため、不備などがあった際の一切の保証はいたしかねます。<br>
+          3. 修理によってメーカー保証や正規店での保証が受けられなくなる場合がございます。<br>
+          ※当店はキャリア正規店ではないため、端末返却プログラムをご利用中のお客様（分割清算中などを含む）の場合、修理後の端末返却に関する保証は一切いたしかねます。キャリア保証等は各キャリアにお問い合わせください。<br>
+          4. 当店ではデータの紛失、破損についてはいかなる場合も一切の保証をいたしかねます。データのバックアップは修理依頼前にお客様の責任において実施をお願いいたします。<br>
+          5. 本体開封後に水没、基板の損傷などが確認された場合は修理できない場合があります。<br>
+          6. 本体開封後に修理箇所以外の不具合、故障、破損等が認められた場合、または発生した場合の責任は負いかねます。<br>
+          ※端末開封時の衝撃等により、まれに故障、破損する場合があります。その際の損傷個所に対して一切の保証ができかねますのであらかじめご了承ください。<br>
+          7. 経年劣化に伴い本体フレームの変形、各プラスチックパーツ、ガラスパーツの劣化がある場合、コネクターを外す際、またはバックパネル等の開封時に、フレーム、フィルム、基板が損傷する恐れがありますが、これらに関する一切の弁償、保証はいたしかねます。<br>
+          8. 電源をOFFにすることができない、タッチ操作ができない等の原因がある端末は分解作業時にショートが起こり故障が生じる場合がありますが、これらに関する一切の保証はいたしかねます。<br>
+          9. パーツ持ち込みでの修理、海外仕様端末、Jailbreak（脱獄）端末、カスタムパーツが装着されている端末の修理後の一切の保証、責任は負いかねます。<br>
+          10. 当店での修理パーツはサードパーティ製（互換パーツ）を使用しております。純正品と比較すると、クオリティ面（色合い、動作感、バッテリー持ち等）で変化、劣化する場合がございます。あらかじめご了承ください。<br>
+          11. お預かりした端末は細心の注意を払って取り扱いをいたしますが、分解作業に伴う微細な傷、小さなホコリの混入が生じる場合がございます。<br>
+          12. 基本機能動作確認（修理前チェック項目等）ができない状態（液晶が映らない、タッチ不可、電源が入らない等）の端末について、修理後の動作保証はいたしかねます。<br>
+          13. 精密機械の特性上、分解作業後にTrueTone機能の消失、各種認証機能（指紋/顔）の不具合、リンゴループ、充電不良等の予期せぬ症状が発生するリスクを了承するものとします。<br>
+          14. iPhoneXR, XS, XS Max以降のバッテリーについては標準バッテリー交換後に「バッテリーに関する重要なメッセージ」という警告文が表示されます。<br>
+          15. iPhoneのホームボタン・Face IDが搭載されている端末について、ガラス割れ、液晶割れ等、作業時の過失に関係なくホームボタン機能・Face ID機能が使えなくなることがあります。<br><br>
+
+          <div class="terms-title">保証規定</div><br>
+          本書記載のお渡し日より90日間（バッテリーについては30日間）、交換パーツに対して1回のみ交換させていただきます。尚、以下の場合はお渡し期間内であっても保証の対象外となり、有償での修理とさせていただきます。<br>
+          1. お渡し後の落下、圧迫、衝撃などによる損傷、変形、動作不良<br>
+          2. 修理受付時の事前動作確認ができなかった場合<br>
+          3. 受付時、端末に水没痕、水没の疑い（経歴）がある場合、または修理過程において水没痕が確認された場合<br>
+          4. 基板損傷（または、その疑い）が原因となる不具合、故障、動作不良の場合<br>
+          5. 当店での修理後、他店での分解、修理、カスタム等が行われた場合<br>
+          6. バッテリー等の消耗品の劣化、摩耗による場合<br>
+          7. 天災（火災、水害、地震、落雷等）による故障、破損の場合<br>
+          8. 故意、過失、不適切な取り扱いによる故障、破損の場合<br>
+          9. 保証書の提示がない場合、または保証書の内容が書き換えられている場合<br>
+          10. 交換パーツ（部品そのもの）の不具合ではなく、本体（基板やその他のパーツ）に起因する動作不良の場合<br>
+          11. 返金の際、作業工賃（技術料）の返金はいたしかねます。また、修理交換後の元パーツ（部品）は原則として当店で回収、処分させていただきます。
+        </div>
+
+        
+        <div class="sig-grid">
+          <div class="sig-card">
+            <div class="sig-title">【1】修理受付時・免責への同意署名</div>
+            <div class="canvas-wrap sig-canvas-wrap">
+              <canvas id="sigCanvas1" class="draw-canvas"></canvas>
+            </div>
+            <div class="canvas-actions">
+              <button type="button" class="btn btn-gray small" onclick="clearCanvas('sigCanvas1')">書き直す</button>
+            </div>
+          </div>
+
+          <div class="sig-card">
+            <div class="sig-title">【2】修理完了・端末お受け取り署名</div>
+            <div class="canvas-wrap sig-canvas-wrap">
+              <canvas id="sigCanvas2" class="draw-canvas"></canvas>
+            </div>
+            <div class="canvas-actions">
+              <button type="button" class="btn btn-gray small" onclick="clearCanvas('sigCanvas2')">書き直す</button>
+            </div>
+          </div>
+        </div>
+
+        <table style="margin-bottom:0;">
+          <tr>
+            <th>お渡し日</th>
+            <td><input type="date" id="outDate"></td>
+                      </tr>
+          <tr>
+            <th>修理担当</th>
+            <td><input type="text" id="staffName" placeholder="修理担当者名"></td>
+            <th>責任者</th>
+            <td><input type="text" id="managerName" placeholder="責任者氏名"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="toolbar exclude-export">
+      <button type="button" class="btn btn-gray" onclick="printMain()">申込書を印刷</button>
+      <button type="button" class="btn btn-blue" onclick="saveAsPng('mainCaptureArea','申込書')">申込書をPNG保存</button>
+      <button type="button" class="btn btn-green" onclick="saveAsPdf('mainCaptureArea','申込書')">申込書をPDF変換</button>
+      <button type="button" class="btn btn-orange" onclick="sharePdf('mainCaptureArea','申込書')">申込書を共有</button>
+      <button type="button" class="btn btn-red" onclick="showWarranty()">保証書ページを表示</button>
+    </div>
+    <div class="helper exclude-export">
+      保証書ページを表示すると、お客様控え用の保証書プレビューが下に出ます。
+    </div>
+  </div>
+
+  <div id="warrantySection">
+    <div class="content">
+      <div class="card">
+        <div class="card-header warranty-head">お客様控え用 保証書ページ</div>
+        <div class="card-body">
+          <div id="warrantyCaptureArea" class="warranty-box">
+            <h2 class="warranty-title">修理品 保証書（お客様控え）</h2>
+            <p class="warranty-lead">
+              <span id="wCustName">---</span> 様、この度は修理をご利用いただき誠にありがとうございました。<br>
+              当店にて修理いたしましたパーツに対し、以下の通り保証いたします。
+            </p>
+
+            <table class="warranty-table">
+              <tr>
+                <th>お渡し日時</th>
+                <td><span id="wOutDate">---</span>　<span id="wOutTime">---</span></td>
+              </tr>
+              <tr>
+                <th>ご依頼機種</th>
+                <td><span id="wModel">---</span></td>
+              </tr>
+              <tr>
+                <th>修理内容</th>
+                <td><span id="wContent">---</span></td>
+              </tr>
+              <tr>
+                <th>修理金額</th>
+                <td style="font-weight:800; color:#b91c1c;"><span id="wPrice">---</span></td>
+              </tr>
+              <tr>
+                <th>担当者</th>
+                <td><span id="wStaff">---</span></td>
+              </tr>
+              <tr>
+                <th>責任者</th>
+                <td><span id="wManager">---</span></td>
+              </tr>
+              <tr>
+                <th>パーツ保証期間</th>
+                <td><strong>本日（お渡し日）より90日間</strong>（バッテリーについては30日間、1回のみ）</td>
+              </tr>
+            </table>
+
+            <div class="warranty-rules">
+              <strong>【保証規定・重要同意事項（抜粋）】</strong><br>
+              1. お渡し後の落下、圧迫、衝撃などによる損傷、変形、動作不良<br>
+              2. 修理受付時の事前動作確認ができなかった場合<br>
+              3. 受付時、端末に水没痕、水没の疑い（経歴）がある場合、または修理過程において水没痕が確認された場合<br>
+              4. 基板損傷（または、その疑い）が原因となる不具合、故障、動作不良の場合<br>
+              5. 当店での修理後、他店での分解、修理、カスタム等が行われた場合<br>
+              6. バッテリー等の消耗品の劣化、摩耗による場合<br>
+              7. 天災（火災、水害、地震、落雷等）による故障、破損の場合<br>
+              8. 故意、過失、不適切な取り扱いによる故障、破損の場合<br>
+              9. 保証書の提示がない場合<br>
+              10. 交換パーツの不具合ではなく、本体に起因する動作不良の場合<br>
+              11. 返金の際、作業工賃の返金はいたしかねます
+            </div>
+
+            <div class="warranty-signs">
+              <div class="warranty-sign-box">
+                <div class="warranty-sign-label">【1. 受付同意サイン】</div>
+                <img id="wSig1" class="warranty-sign-img" alt="受付同意サイン">
+              </div>
+              <div class="warranty-sign-box">
+                <div class="warranty-sign-label">【2. 完了受取サイン】</div>
+                <img id="wSig2" class="warranty-sign-img" alt="完了受取サイン">
+              </div>
+            </div>
+
+            <div class="warranty-note">
+              この保証書は、申込書の入力内容から自動生成されたお客様控えです。
+            </div>
+          </div>
+
+          <div class="toolbar exclude-export" style="position:static; margin-top:16px; border-top:none; background:transparent; padding:0;">
+            <button type="button" class="btn btn-blue" onclick="saveAsPng('warrantyCaptureArea','保証書')">保証書をPNG保存</button>
+            <button type="button" class="btn btn-green" onclick="saveAsPdf('warrantyCaptureArea','保証書')">保証書をPDF変換</button>
+            <button type="button" class="btn btn-orange" onclick="sharePdf('warrantyCaptureArea','保証書')">保証書を共有</button>
+            <button type="button" class="btn btn-gray" onclick="printWarranty()">保証書を印刷</button>
+            <button type="button" class="btn btn-red" onclick="hideWarranty()">保証書を閉じる</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const canvasRegistry = {};
+
+  function setupCanvas(canvasId, options = {}) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    function fitCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = options.color || '#000000';
+      ctx.lineWidth = options.lineWidth || 3;
+    }
+
+    fitCanvas();
+
+    let drawing = false;
+    let pointerId = null;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    function start(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      drawing = true;
+      pointerId = e.pointerId;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      try { canvas.setPointerCapture(e.pointerId); } catch(err) {}
+      e.preventDefault();
+    }
+
+    function move(e) {
+      if (!drawing || pointerId !== e.pointerId) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    }
+
+    function end(e) {
+      if (pointerId !== e.pointerId) return;
+      drawing = false;
+      try { canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+      pointerId = null;
+    }
+
+    canvas.addEventListener('pointerdown', start, { passive: false });
+    canvas.addEventListener('pointermove', move, { passive: false });
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+
+    canvasRegistry[canvasId] = { canvas, ctx, fitCanvas };
+  }
+
+  function clearCanvas(canvasId) {
+    const item = canvasRegistry[canvasId];
+    if (!item) return;
+    item.ctx.save();
+    item.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    item.ctx.clearRect(0, 0, item.canvas.width, item.canvas.height);
+    item.ctx.restore();
+    item.ctx.lineCap = 'round';
+    item.ctx.lineJoin = 'round';
+    updateWarranty();
+  }
+
+  function setTodayDefaults() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const today = `${yyyy}-${mm}-${dd}`;
+    const time = `${hh}:${mi}`;
+
+    const reqDate = document.getElementById('reqDate');
+    const outDate = document.getElementById('outDate');
+    const outTime = document.getElementById('outTime');
+
+    if (reqDate && !reqDate.value) reqDate.value = today;
+    if (outDate && !outDate.value) outDate.value = today;
+    if (outTime && !outTime.value) outTime.value = time;
+  }
+
+  function fileTimestamp() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    return `${yyyy}${mm}${dd}_${hh}${mi}`;
+  }
+
+  function sanitizeName(value) {
+    return (value || '修理受付').replace(/[\\/:*?"<>|]/g, '').trim() || '修理受付';
+  }
+
+  function buildBaseFilename(prefix, ext = '') {
+    const name = sanitizeName(document.getElementById('custName').value || 'お客様');
+    const model = sanitizeName(document.getElementById('devModel').value || '端末');
+    return `${prefix}_${name}_${model}_${fileTimestamp()}${ext}`;
+  }
+
+  async function renderNodeToCanvas(targetId) {
+    const target = document.getElementById(targetId);
+    const hiddenNodes = Array.from(document.querySelectorAll('.exclude-export'));
+    hiddenNodes.forEach(el => el.classList.add('hidden-export'));
+
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      scrollY: -window.scrollY,
+      scrollX: -window.scrollX,
+      windowWidth: document.documentElement.scrollWidth
+    });
+
+    hiddenNodes.forEach(el => el.classList.remove('hidden-export'));
+    return canvas;
+  }
+
+  function blobFromCanvas(canvas, type = 'image/png', quality = 1) {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), type, quality);
+    });
+  }
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  async function saveAsPng(targetId, prefix) {
+    try {
+      if (targetId === 'warrantyCaptureArea') updateWarranty();
+      const canvas = await renderNodeToCanvas(targetId);
+      const blob = await blobFromCanvas(canvas, 'image/png');
+      if (!blob) {
+        alert('PNG保存に失敗しました。');
+        return;
+      }
+      downloadBlob(blob, buildBaseFilename(prefix, '.png'));
+    } catch (e) {
+      console.error(e);
+      alert('PNG保存に失敗しました。もう一度お試しください。');
+    }
+  }
+
+  async function createPdfBlob(targetId) {
+    if (targetId === 'warrantyCaptureArea') updateWarranty();
+    const canvas = await renderNodeToCanvas(targetId);
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 6;
+    const usableWidth = pageWidth - margin * 2;
+    const usableHeight = pageHeight - margin * 2;
+
+    const imageHeight = canvas.height * usableWidth / canvas.width;
+    let heightLeft = imageHeight;
+    let position = margin;
+
+    pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imageHeight, undefined, 'FAST');
+    heightLeft -= usableHeight;
+
+    while (heightLeft > 0) {
+      position = margin - (imageHeight - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imageHeight, undefined, 'FAST');
+      heightLeft -= usableHeight;
+    }
+
+    return pdf.output('blob');
+  }
+
+  async function saveAsPdf(targetId, prefix) {
+    try {
+      const blob = await createPdfBlob(targetId);
+      downloadBlob(blob, buildBaseFilename(prefix, '.pdf'));
+    } catch (e) {
+      console.error(e);
+      alert('PDF変換に失敗しました。もう一度お試しください。');
+    }
+  }
+
+  async function sharePdf(targetId, prefix) {
+    try {
+      const blob = await createPdfBlob(targetId);
+      const filename = buildBaseFilename(prefix, '.pdf');
+      const file = new File([blob], filename, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+        await navigator.share({ files: [file] });
+        return;
+      }
+
+      downloadBlob(blob, filename);
+      alert('この端末ではファイル共有に未対応のため、PDFを保存しました。保存後にメールやLINEへ添付してください。');
+    } catch (e) {
+      console.error(e);
+      alert('共有に失敗しました。PDF変換ボタンで保存後、手動でメール添付してください。');
+    }
+  }
+
+  function textOf(id, fallback = '---') {
+    const el = document.getElementById(id);
+    return (el && el.value && el.value.trim()) ? el.value.trim() : fallback;
+  }
+
+  function updateWarranty() {
+    document.getElementById('wCustName').textContent = textOf('custName', '---');
+    document.getElementById('wOutDate').textContent = textOf('outDate', '---');
+    document.getElementById('wOutTime').textContent = textOf('outTime', '---');
+    document.getElementById('wModel').textContent = textOf('devModel', '---');
+    document.getElementById('wContent').textContent = textOf('repContent', '---');
+    document.getElementById('wPrice').textContent = textOf('repPrice', '---');
+    document.getElementById('wStaff').textContent = textOf('staffName', '---');
+    document.getElementById('wManager').textContent = textOf('managerName', '---');
+
+    document.getElementById('wSig1').src = document.getElementById('sigCanvas1').toDataURL('image/png');
+    document.getElementById('wSig2').src = document.getElementById('sigCanvas2').toDataURL('image/png');
+  }
+
+  function showWarranty() {
+    updateWarranty();
+    const section = document.getElementById('warrantySection');
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function hideWarranty() {
+    document.getElementById('warrantySection').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function printMain() {
+    document.body.classList.remove('print-warranty');
+    document.body.classList.add('print-main');
+    window.print();
+  }
+
+  function printWarranty() {
+    showWarranty();
+    document.body.classList.remove('print-main');
+    document.body.classList.add('print-warranty');
+    setTimeout(() => window.print(), 200);
+  }
+
+  window.addEventListener('afterprint', () => {
+    document.body.classList.remove('print-main', 'print-warranty');
+  });
+
+  function setupExclusiveChecks() {
+    const iphone = document.getElementById('typeIphone');
+    const android = document.getElementById('typeAndroid');
+
+    iphone.addEventListener('change', () => {
+      if (iphone.checked) android.checked = false;
+    });
+
+    android.addEventListener('change', () => {
+      if (android.checked) iphone.checked = false;
+    });
+  }
+
+  function bindWarrantyAutoUpdate() {
+    [
+      'custName',
+      'devModel',
+      'repContent',
+      'repPrice',
+      'outDate',
+      'outTime',
+      'staffName',
+      'managerName'
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updateWarranty);
+        el.addEventListener('change', updateWarranty);
+      }
+    });
+  }
+
+  setupCanvas('damageFrontCanvas', { color: '#ef4444', lineWidth: 3 });
+  setupCanvas('damageBackCanvas', { color: '#ef4444', lineWidth: 3 });
+  setupCanvas('sigCanvas1', { color: '#000000', lineWidth: 3.5 });
+  setupCanvas('sigCanvas2', { color: '#000000', lineWidth: 3.5 });
+  setTodayDefaults();
+  setupExclusiveChecks();
+  bindWarrantyAutoUpdate();
+  updateWarranty();
+</script>
+
+</body>
+</html>
